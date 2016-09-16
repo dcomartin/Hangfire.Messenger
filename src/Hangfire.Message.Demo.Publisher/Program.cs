@@ -18,7 +18,12 @@ namespace Hangfire.Message.Demo.Publisher
         static void Main(string[] args)
         {
             var container = new UnityContainer();
-            container.RegisterTypes(AllClasses.FromAssemblies(typeof(Ping).Assembly), WithMappings.FromAllInterfaces, GetName, GetLifetimeManager);
+            /*container.RegisterTypes(AllClasses.FromAssemblies(typeof(Ping).Assembly), WithMappings.FromAllInterfaces,
+                type => type.FullName, type => new TransientLifetimeManager());
+            */
+            container.RegisterType<IAsyncRequestHandler<Ping, Unit>, PingHandler>();
+            container.RegisterType<IAsyncNotificationHandler<Pong>, PongHandler>("HandlerForPong");
+
             container.RegisterInstance<SingleInstanceFactory>(t => container.Resolve(t));
             container.RegisterInstance<MultiInstanceFactory>(t => container.ResolveAll(t));
             
@@ -39,21 +44,6 @@ namespace Hangfire.Message.Demo.Publisher
             Console.WriteLine($"Hangfire Server started on Thread {Thread.CurrentThread.ManagedThreadId}.");
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
-        }
-
-        static bool IsNotificationHandler(Type type)
-        {
-            return type.GetInterfaces().Any(x => x.IsGenericType && (x.GetGenericTypeDefinition() == typeof(INotificationHandler<>) || x.GetGenericTypeDefinition() == typeof(IAsyncNotificationHandler<>)));
-        }
-
-        static LifetimeManager GetLifetimeManager(Type type)
-        {
-            return IsNotificationHandler(type) ? new ContainerControlledLifetimeManager() : null;
-        }
-
-        static string GetName(Type type)
-        {
-            return IsNotificationHandler(type) ? string.Format("HandlerFor" + type.Name) : string.Empty;
         }
     }
 }

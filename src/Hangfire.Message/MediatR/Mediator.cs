@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using System.Text.RegularExpressions;
+using Hangfire;
 using Hangfire.Message;
 using MediatR.Internal;
 
@@ -36,25 +37,44 @@ namespace MediatR
             _wrapperHandlerCache = new ConcurrentDictionary<Type, Type>();
         }
 
-        public TResponse Send<TResponse>(IRequest<TResponse> request)
-        {
-            var defaultHandler = GetHandler(request);
-
-            var result = defaultHandler.Handle(request);
-
-            return result;
-        }
-
         public void Enqueue(IAsyncRequest request)
         {
-            BackgroundJob.Enqueue<Mediator>(m => m.ProcessEnqueued(request));
+            BackgroundJob.Enqueue<Mediator>(m => m.ProcessRequestEnqueued("default", request));
         }
 
-        public void ProcessEnqueued(IAsyncRequest request)
+        public void ProcessRequestEnqueued(IAsyncRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void PublishEnqueue(IAsyncNotification notification)
+        {
+            var regex = new Regex("[^a-zA-Z0-9]");
+            
+            var servers = Hangfire.JobStorage.Current.GetMonitoringApi().Servers();
+            foreach (var server in servers)
+            {
+                var queueName = regex.Replace(server.Name.ToLowerInvariant(), string.Empty);
+                var notificationHandlers = GetNotificationHandlers(notification).ToArray();
+                foreach (var handler in notificationHandlers)
+                {
+                    BackgroundJob.Enqueue<Mediator>(m => m.ProcessNotificationEnqueued(queueName, notification));
+                }
+            }
+        }
+
+        [UseQueueFromParameter(0)]
+        public void ProcessRequestEnqueued(string queueName, IAsyncRequest request)
         {
             SendAsync(request).Wait();
         }
 
+        [UseQueueFromParameter(0)]
+        public void ProcessNotificationEnqueued(string queueName, IAsyncNotification notification)
+        {
+            PublishAsync(notification).Wait();
+        }
+        
         public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
         {
             var defaultHandler = GetHandler(request);
@@ -100,6 +120,8 @@ namespace MediatR
 
             return Task.WhenAll(notificationHandlers);
         }
+
+
 
         private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
         {

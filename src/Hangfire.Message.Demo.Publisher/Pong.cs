@@ -16,7 +16,7 @@ namespace Hangfire.Message.Demo.Publisher
     {
         public async Task Handle(Pong notification)
         {
-            Console.WriteLine($"Pong on {Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"Pong on Thread #{Thread.CurrentThread.ManagedThreadId}");
         }
     }
 }

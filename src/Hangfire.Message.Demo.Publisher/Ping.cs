@@ -16,7 +16,7 @@ namespace Hangfire.Message.Demo.Publisher
     {
         public async Task<Unit> Handle(Ping message, IMediator mediator)
         {
-            Console.WriteLine($"Ping on {Thread.CurrentThread.ManagedThreadId}");
+            Console.WriteLine($"Ping on Thread #{Thread.CurrentThread.ManagedThreadId}");
 
             await mediator.PublishAsync(new Pong());
 

@@ -83,6 +83,7 @@
     <Compile Include="MediatR\Unit.cs" />
     <Compile Include="MessageJobActivator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UseQueueFromParameterAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MediatR\MediatR.xproj" />

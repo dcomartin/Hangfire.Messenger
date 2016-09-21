@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackgroundJobServerOptionsHelper.cs" />
     <Compile Include="HangfireExtensions.cs" />
     <Compile Include="HangfireMediator.cs" />
     <Compile Include="MediatR\AsyncRequestHandler.cs" />

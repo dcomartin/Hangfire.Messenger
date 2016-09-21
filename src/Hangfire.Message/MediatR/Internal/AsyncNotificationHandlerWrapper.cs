@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace MediatR.Internal
@@ -5,6 +6,7 @@ namespace MediatR.Internal
     internal abstract class AsyncNotificationHandlerWrapper
     {
         public abstract Task Handle(IAsyncNotification message);
+        public abstract Type GetNotificationHandlerType();
     }
 
     internal class AsyncNotificationHandlerWrapper<TNotification> : AsyncNotificationHandlerWrapper
@@ -20,6 +22,11 @@ namespace MediatR.Internal
         public override Task Handle(IAsyncNotification message)
         {
             return _inner.Handle((TNotification)message);
+        }
+
+        public override Type GetNotificationHandlerType()
+        {
+            return _inner.GetType();
         }
     }
 }

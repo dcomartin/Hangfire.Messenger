@@ -18,7 +18,7 @@ namespace Hangfire.Message.Demo.Publisher
         {
             Console.WriteLine($"Ping on Thread #{Thread.CurrentThread.ManagedThreadId}");
 
-            await mediator.PublishAsync(new Pong());
+            mediator.PublishEnqueue(new Pong());
 
             return Unit.Value;
         }

@@ -19,4 +19,12 @@ namespace Hangfire.Message.Demo.Publisher
             Console.WriteLine($"Pong on Thread #{Thread.CurrentThread.ManagedThreadId}");
         }
     }
+
+    public class PongPongHandler : IAsyncNotificationHandler<Pong>
+    {
+        public async Task Handle(Pong notification)
+        {
+            Console.WriteLine($"PongPong on Thread #{Thread.CurrentThread.ManagedThreadId}");
+        }
+    }
 }

@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 
 namespace MediatR
 {
@@ -9,8 +10,6 @@ namespace MediatR
     public interface IMediator
     {
         void Enqueue(IAsyncRequest request);
-        void ProcessRequestEnqueued(IAsyncRequest request);
-
         /// <summary>
         /// Asynchronously send a request to a single handler 
         /// </summary>

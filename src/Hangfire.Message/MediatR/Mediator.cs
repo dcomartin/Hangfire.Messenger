@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Hangfire;
 using Hangfire.Message;
 using MediatR.Internal;
@@ -15,20 +17,14 @@ namespace MediatR
     /// <summary>
     /// Default mediator implementation relying on single- and multi instance delegates for resolving handlers.
     /// </summary>
-    public class Mediator : IMediator
+    public class Mediator : IMediator, IDisposable
     {
         private readonly SingleInstanceFactory _singleInstanceFactory;
-
         private readonly MultiInstanceFactory _multiInstanceFactory;
-
         private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
         private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
+        private BackgroundJobServer _backgroundJobServer;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Mediator"/> class.
-        /// </summary>
-        /// <param name="singleInstanceFactory">The single instance factory.</param>
-        /// <param name="multiInstanceFactory">The multi instance factory.</param>
         public Mediator(SingleInstanceFactory singleInstanceFactory, MultiInstanceFactory multiInstanceFactory)
         {
             _singleInstanceFactory = singleInstanceFactory;
@@ -39,40 +35,44 @@ namespace MediatR
 
         public void Enqueue(IAsyncRequest request)
         {
-            BackgroundJob.Enqueue<Mediator>(m => m.ProcessRequestEnqueued("default", request));
-        }
-
-        public void ProcessRequestEnqueued(IAsyncRequest request)
-        {
-            throw new NotImplementedException();
+            BackgroundJob.Enqueue<Mediator>(m => m.ProcessRequestInBackground(request.GetType().FullName, "default", request));
         }
 
         public void PublishEnqueue(IAsyncNotification notification)
         {
-            var regex = new Regex("[^a-zA-Z0-9]");
+            var regex = new Regex("[^a-zA-Z0-9_]");
             
             var servers = Hangfire.JobStorage.Current.GetMonitoringApi().Servers();
             foreach (var server in servers)
             {
-                var queueName = regex.Replace(server.Name.ToLowerInvariant(), string.Empty);
+                var nameParts = server.Name.Split(':');
+                var serverName = nameParts[0];
+
+                var queueName = regex.Replace(serverName.ToLowerInvariant(), string.Empty);
                 var notificationHandlers = GetNotificationHandlers(notification).ToArray();
                 foreach (var handler in notificationHandlers)
                 {
-                    BackgroundJob.Enqueue<Mediator>(m => m.ProcessNotificationEnqueued(queueName, notification));
+                    BackgroundJob.Enqueue<Mediator>(
+                        m =>
+                            m.ProcessNotificationInBackground(handler.GetNotificationHandlerType().FullName, queueName,
+                                handler.GetNotificationHandlerType(), notification));
+
                 }
             }
         }
 
-        [UseQueueFromParameter(0)]
-        public void ProcessRequestEnqueued(string queueName, IAsyncRequest request)
+        [UseQueueFromParameter(1)]
+        [DisplayName("{0}")]
+        public void ProcessRequestInBackground(string jobName, string queueName, IAsyncRequest request)
         {
             SendAsync(request).Wait();
         }
 
-        [UseQueueFromParameter(0)]
-        public void ProcessNotificationEnqueued(string queueName, IAsyncNotification notification)
+        [DisplayName("{0}")]
+        [UseQueueFromParameter(1)]
+        public void ProcessNotificationInBackground(string jobName, string queueName, Type handler, IAsyncNotification notification)
         {
-            PublishAsync(notification).Wait();
+            PublishAsync(notification, handler).Wait();
         }
         
         public Task<TResponse> SendAsync<TResponse>(IAsyncRequest<TResponse> request)
@@ -93,16 +93,6 @@ namespace MediatR
             return result;
         }
 
-        public void Publish(INotification notification)
-        {
-            var notificationHandlers = GetNotificationHandlers(notification);
-
-            foreach (var handler in notificationHandlers)
-            {
-                handler.Handle(notification);
-            }
-        }
-
         public Task PublishAsync(IAsyncNotification notification)
         {
             var notificationHandlers = GetNotificationHandlers(notification)
@@ -112,6 +102,17 @@ namespace MediatR
             return Task.WhenAll(notificationHandlers);
         }
 
+        public async Task PublishAsync(IAsyncNotification notification, Type notificationHandlerType)
+        {
+            var notificationHandlers =
+                GetNotificationHandlers(notification)
+                    .Where(x => x.GetNotificationHandlerType().FullName == notificationHandlerType.FullName)
+                    .Select(handler => handler.Handle(notification))
+                    .ToArray();
+
+            await Task.WhenAll(notificationHandlers);
+        }
+
         public Task PublishAsync(ICancellableAsyncNotification notification, CancellationToken cancellationToken)
         {
             var notificationHandlers = GetNotificationHandlers(notification)
@@ -119,15 +120,6 @@ namespace MediatR
                 .ToArray();
 
             return Task.WhenAll(notificationHandlers);
-        }
-
-
-
-        private RequestHandlerWrapper<TResponse> GetHandler<TResponse>(IRequest<TResponse> request)
-        {
-            return GetHandler<RequestHandlerWrapper<TResponse>, TResponse>(request,
-                typeof(IRequestHandler<,>),
-                typeof(RequestHandlerWrapper<,>));
         }
 
         private AsyncRequestHandlerWrapper<TResponse> GetHandler<TResponse>(IAsyncRequest<TResponse> request)
@@ -166,13 +158,6 @@ namespace MediatR
             {
                 throw BuildException(request, e);
             }
-        }
-
-        private IEnumerable<NotificationHandlerWrapper> GetNotificationHandlers(INotification notification)
-        {
-            return GetNotificationHandlers<NotificationHandlerWrapper>(notification,
-                typeof(INotificationHandler<>),
-                typeof(NotificationHandlerWrapper<>));
         }
 
         private IEnumerable<AsyncNotificationHandlerWrapper> GetNotificationHandlers(IAsyncNotification notification)
@@ -217,6 +202,11 @@ namespace MediatR
         private static InvalidOperationException BuildException(object message, Exception inner)
         {
             return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", inner);
+        }
+
+        public void Dispose()
+        {
+            _backgroundJobServer?.Dispose();
         }
     }
 }

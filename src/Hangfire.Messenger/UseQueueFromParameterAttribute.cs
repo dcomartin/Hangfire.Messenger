@@ -1,0 +1,24 @@
+﻿using Hangfire.Common;
+using Hangfire.States;
+
+namespace Hangfire.Messenger
+{
+    internal class UseQueueFromParameterAttribute : JobFilterAttribute, IElectStateFilter
+    {
+        public UseQueueFromParameterAttribute(int parameterIndex)
+        {
+            this.ParameterIndex = parameterIndex;
+        }
+
+        private int ParameterIndex { get; set; }
+
+        public void OnStateElection(ElectStateContext context)
+        {
+            var enqueuedState = context.CandidateState as EnqueuedState;
+            if (enqueuedState != null)
+            {
+                enqueuedState.Queue = context.BackgroundJob.Job.Args[ParameterIndex].ToString().Replace("\"", string.Empty);
+            }
+        }
+    }
+}

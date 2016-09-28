@@ -19,9 +19,11 @@ namespace Hangfire.Messenger.Demo
 
             var mediator = GlobalConfiguration.Configuration
                 .UseMessaging(type => container.Resolve(type), type => container.ResolveAll(type));
-            
-            var ping = new Ping();
-            mediator.Enqueue(ping);
+
+            Console.WriteLine($"Main Thread #{Thread.CurrentThread.ManagedThreadId}");
+
+            mediator.Enqueue(new Ping("Background"));
+            mediator.Send(new Ping("InProc"));
 
             using (WebApp.Start<Startup>("http://localhost:12345"))
             {

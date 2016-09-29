@@ -11,7 +11,7 @@ namespace Hangfire.Messenger
     {
         public async Task<Unit> Handle(TMessage message, IMessenger messenger)
         {
-            await HandleCore(message).ConfigureAwait(false);
+            await HandleCore(message, messenger).ConfigureAwait(false);
 
             return Unit.Value;
         }
@@ -20,7 +20,8 @@ namespace Hangfire.Messenger
         /// Handles a void request
         /// </summary>
         /// <param name="message">The request message</param>
+        /// <param name="messenger"></param>
         /// <returns>A task representing the void response from the request</returns>
-        protected abstract Task HandleCore(TMessage message);
+        protected abstract Task HandleCore(TMessage message, IMessenger messenger);
     }
 }

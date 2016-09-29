@@ -14,15 +14,14 @@ namespace Hangfire.Messenger.Demo
         }
     }
 
-    public class PingHandler : IRequestHandler<Ping, Unit>
+    public class PingHandler : RequestHandler<Ping>
     {
-        public async Task<Unit> Handle(Ping message, IMessenger messenger)
+        protected override async Task HandleCore(Ping message, IMessenger messenger)
         {
             Console.WriteLine($"Ping {message.Message} on Thread #{Thread.CurrentThread.ManagedThreadId}");
 
             messenger.PublishToBackground(new Pong("Background"));
             await messenger.Publish(new Pong("InProc"));
-            return Unit.Value;
         }
     }
 }

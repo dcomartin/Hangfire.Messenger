@@ -99,6 +99,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RequestWithResponse.cs" />
     <Compile Include="Ping.cs" />
     <Compile Include="Pong.cs" />
     <Compile Include="Program.cs" />

@@ -3,9 +3,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Messenger", "Hangfire.Messenger\Hangfire.Messenger.csproj", "{3DA42152-94DA-454C-AC75-FFB3801821EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Messenger", "src\Hangfire.Messenger\Hangfire.Messenger.csproj", "{3DA42152-94DA-454C-AC75-FFB3801821EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Messenger.Demo", "Hangfire.Messenger.Demo\Hangfire.Messenger.Demo.csproj", "{43D30FEC-69E6-4C02-B7A4-4415B8766A51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hangfire.Messenger.Demo", "src\Hangfire.Messenger.Demo\Hangfire.Messenger.Demo.csproj", "{43D30FEC-69E6-4C02-B7A4-4415B8766A51}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{84156EB5-67DD-4A09-B545-4C4A668A357E}"
+	ProjectSection(SolutionItems) = preProject
+		build.cake = build.cake
+		build.ps1 = build.ps1
+		cake.config = cake.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Hangfire.Messenger.Demo
 {
-    public class Pong : IAsyncNotification
+    public class Pong : INotification
     {
         public string Message { get; }
 
@@ -14,7 +14,7 @@ namespace Hangfire.Messenger.Demo
         }
     }
 
-    public class Pong1Handler : IAsyncNotificationHandler<Pong>
+    public class Pong1Handler : INotificationHandler<Pong>
     {
         public async Task Handle(Pong notification)
         {
@@ -22,7 +22,7 @@ namespace Hangfire.Messenger.Demo
         }
     }
 
-    public class Pong2Handler : IAsyncNotificationHandler<Pong>
+    public class Pong2Handler : INotificationHandler<Pong>
     {
         public async Task Handle(Pong notification)
         {

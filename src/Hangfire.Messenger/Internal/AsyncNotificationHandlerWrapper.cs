@@ -5,21 +5,21 @@ namespace Hangfire.Messenger.Internal
 {
     internal abstract class AsyncNotificationHandlerWrapper
     {
-        public abstract Task Handle(IAsyncNotification message);
+        public abstract Task Handle(INotification message);
         public abstract Type GetNotificationHandlerType();
     }
 
     internal class AsyncNotificationHandlerWrapper<TNotification> : AsyncNotificationHandlerWrapper
-        where TNotification : IAsyncNotification
+        where TNotification : INotification
     {
-        private readonly IAsyncNotificationHandler<TNotification> _inner;
+        private readonly INotificationHandler<TNotification> _inner;
 
-        public AsyncNotificationHandlerWrapper(IAsyncNotificationHandler<TNotification> inner)
+        public AsyncNotificationHandlerWrapper(INotificationHandler<TNotification> inner)
         {
             _inner = inner;
         }
 
-        public override Task Handle(IAsyncNotification message)
+        public override Task Handle(INotification message)
         {
             return _inner.Handle((TNotification)message);
         }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Hangfire.Messenger.Demo
 {
-    public class Ping : IAsyncRequest
+    public class Ping : IRequest
     {
         public string Message { get; }
 
@@ -14,7 +14,7 @@ namespace Hangfire.Messenger.Demo
         }
     }
 
-    public class PingHandler : IAsyncRequestHandler<Ping, Unit>
+    public class PingHandler : IRequestHandler<Ping, Unit>
     {
         public async Task<Unit> Handle(Ping message, IMessenger messenger)
         {

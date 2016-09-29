@@ -7,7 +7,7 @@ namespace Hangfire.Messenger
     {
         public UseQueueFromParameterAttribute(int parameterIndex)
         {
-            this.ParameterIndex = parameterIndex;
+            ParameterIndex = parameterIndex;
         }
 
         private int ParameterIndex { get; set; }

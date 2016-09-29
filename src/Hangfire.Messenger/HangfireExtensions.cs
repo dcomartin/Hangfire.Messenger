@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Hangfire.Common;
-using Hangfire.Message;
 using Newtonsoft.Json;
 
 namespace Hangfire.Messenger
@@ -26,7 +25,7 @@ namespace Hangfire.Messenger
             var options = new BackgroundJobServerOptions
             {
                 ServerName = serverName,
-                Queues = new string[] { "default", serverName },
+                Queues = new[] { "default", serverName },
                 Activator = new MessageJobActivator(mediator)
             };
 

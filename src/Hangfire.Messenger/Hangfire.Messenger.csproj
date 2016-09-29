@@ -53,12 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HangfireExtensions.cs" />
-    <Compile Include="AsyncRequestHandler.cs" />
+    <Compile Include="RequestHandler.cs" />
     <Compile Include="ConcurrentDictionaryExtensions.cs" />
-    <Compile Include="IAsyncNotification.cs" />
-    <Compile Include="IAsyncNotificationHandler.cs" />
-    <Compile Include="IAsyncRequest.cs" />
-    <Compile Include="IAsyncRequestHandler.cs" />
+    <Compile Include="INotification.cs" />
+    <Compile Include="INotificationHandler.cs" />
+    <Compile Include="IRequest.cs" />
+    <Compile Include="IRequestHandler.cs" />
     <Compile Include="IMessenger.cs" />
     <Compile Include="Internal\AsyncNotificationHandlerWrapper.cs" />
     <Compile Include="Internal\AsyncRequestHandlerWrapper.cs" />
@@ -69,7 +69,6 @@
     <Compile Include="UseQueueFromParameterAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -10,20 +10,20 @@ namespace Hangfire.Messenger.Demo
         static void Main(string[] args)
         {
             var container = new UnityContainer();
-            container.RegisterType<IAsyncRequestHandler<Ping, Unit>, PingHandler>();
-            container.RegisterType<IAsyncNotificationHandler<Pong>, Pong1Handler>("HandlerForPong");
-            container.RegisterType<IAsyncNotificationHandler<Pong>, Pong2Handler>("HandlerForPongPong");
+            container.RegisterType<IRequestHandler<Ping, Unit>, PingHandler>();
+            container.RegisterType<INotificationHandler<Pong>, Pong1Handler>("HandlerForPong");
+            container.RegisterType<INotificationHandler<Pong>, Pong2Handler>("HandlerForPongPong");
             
             GlobalConfiguration.Configuration.UseColouredConsoleLogProvider();
             GlobalConfiguration.Configuration.UseSqlServerStorage("Server=(LocalDB)\\MSSQLLocalDB;Database=HangfireMessage;Trusted_Connection=True;");
 
-            var mediator = GlobalConfiguration.Configuration
+            var messenger = GlobalConfiguration.Configuration
                 .UseMessaging(type => container.Resolve(type), type => container.ResolveAll(type));
 
             Console.WriteLine($"Main Thread #{Thread.CurrentThread.ManagedThreadId}");
 
-            mediator.Enqueue(new Ping("Background"));
-            mediator.Send(new Ping("InProc"));
+            messenger.Enqueue(new Ping("Background"));
+            messenger.Send(new Ping("InProc"));
 
             using (WebApp.Start<Startup>("http://localhost:12345"))
             {

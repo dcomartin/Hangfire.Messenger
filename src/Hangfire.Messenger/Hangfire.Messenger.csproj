@@ -60,8 +60,8 @@
     <Compile Include="IRequest.cs" />
     <Compile Include="IRequestHandler.cs" />
     <Compile Include="IMessenger.cs" />
-    <Compile Include="Internal\AsyncNotificationHandlerWrapper.cs" />
-    <Compile Include="Internal\AsyncRequestHandlerWrapper.cs" />
+    <Compile Include="Internal\NotificationHandlerWrapper.cs" />
+    <Compile Include="Internal\RequestHandlerWrapper.cs" />
     <Compile Include="Messenger.cs" />
     <Compile Include="Unit.cs" />
     <Compile Include="MessageJobActivator.cs" />

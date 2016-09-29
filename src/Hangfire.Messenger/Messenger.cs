@@ -96,16 +96,16 @@ namespace Hangfire.Messenger
             await Task.WhenAll(notificationHandlers);
         }
         
-        private AsyncRequestHandlerWrapper<TResponse> GetRequestHandler<TResponse>(IRequest<TResponse> request)
+        private RequestHandlerWrapper<TResponse> GetRequestHandler<TResponse>(IRequest<TResponse> request)
         {
             var requestType = request.GetType();
 
             var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, typeof(IRequestHandler<,>), (type, root) => root.MakeGenericType(type, typeof(TResponse)));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, typeof(AsyncRequestHandlerWrapper<,>), (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, typeof(RequestHandlerWrapper<,>), (type, root) => root.MakeGenericType(type, typeof(TResponse)));
 
             var handler = GetRequestHandler(request, genericHandlerType);
 
-            return (AsyncRequestHandlerWrapper<TResponse>)Activator.CreateInstance(genericWrapperType, this, handler);
+            return (RequestHandlerWrapper<TResponse>)Activator.CreateInstance(genericWrapperType, this, handler);
         }
         
         private object GetRequestHandler(object request, Type handlerType)
@@ -120,16 +120,16 @@ namespace Hangfire.Messenger
             }
         }
 
-        private IEnumerable<AsyncNotificationHandlerWrapper> GetNotificationHandlers(INotification notification)
+        private IEnumerable<NotificationHandlerWrapper> GetNotificationHandlers(INotification notification)
         {
             var notificationType = notification.GetType();
 
             var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, typeof(INotificationHandler<>), (type, root) => root.MakeGenericType(type));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, typeof(AsyncNotificationHandlerWrapper<>), (type, root) => root.MakeGenericType(type));
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, typeof(NotificationHandlerWrapper<>), (type, root) => root.MakeGenericType(type));
 
             return GetNotificationHandlers(notification, genericHandlerType)
-                .Select(handler => Activator.CreateInstance(genericWrapperType, handler))
-                .Cast<AsyncNotificationHandlerWrapper>()
+                .Select(handler => Activator.CreateInstance(genericWrapperType, this, handler))
+                .Cast<NotificationHandlerWrapper>()
                 .ToList();
         }
 

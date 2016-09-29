@@ -16,7 +16,7 @@ namespace Hangfire.Messenger.Demo
 
     public class Pong1Handler : INotificationHandler<Pong>
     {
-        public async Task Handle(Pong notification)
+        public async Task Handle(Pong notification, IMessenger messenger)
         {
             Console.WriteLine($"Pong1 {notification.Message} on Thread #{Thread.CurrentThread.ManagedThreadId}");
         }
@@ -24,7 +24,7 @@ namespace Hangfire.Messenger.Demo
 
     public class Pong2Handler : INotificationHandler<Pong>
     {
-        public async Task Handle(Pong notification)
+        public async Task Handle(Pong notification, IMessenger messenger)
         {
             Console.WriteLine($"Pong2 {notification.Message} on Thread #{Thread.CurrentThread.ManagedThreadId}");
         }

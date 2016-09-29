@@ -14,6 +14,6 @@ namespace Hangfire.Messenger
         /// </summary>
         /// <param name="notification">The notification message</param>
         /// <returns>A task representing handling the notification</returns>
-        Task Handle(TNotification notification);
+        Task Handle(TNotification notification, IMessenger messenger);
     }
 }

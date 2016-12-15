@@ -6,14 +6,13 @@ namespace Hangfire.Messenger
     /// Helper class for asynchronous requests that return a void response
     /// </summary>
     /// <typeparam name="TMessage">The type of void request being handled</typeparam>
-    public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage, Unit>
+    public abstract class RequestHandler<TMessage> : IRequestHandler<TMessage, NoResult>
         where TMessage : IRequest
     {
-        public async Task<Unit> Handle(TMessage message, IMessenger messenger)
+        public async Task<NoResult> Handle(TMessage message, IMessenger messenger)
         {
             await HandleCore(message, messenger).ConfigureAwait(false);
-
-            return Unit.Value;
+            return NoResult.Value;
         }
 
         /// <summary>

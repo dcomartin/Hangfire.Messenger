@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace Hangfire.Messenger
+namespace Hangfire.Messenger.Internal
 {
-    public class MessageJobActivator : JobActivator
+    internal class MessageJobActivator : JobActivator
     {
         private readonly IMessenger _messenger;
 

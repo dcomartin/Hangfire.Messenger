@@ -5,12 +5,12 @@
     /// <summary>
     /// Represents a void type, since <see cref="System.Void"/> is not a valid return type in C#.
     /// </summary>
-    public struct Unit : IEquatable<Unit>, IComparable<Unit>, IComparable
+    public struct NoResult : IEquatable<NoResult>, IComparable<NoResult>, IComparable
     {
         /// <summary>
-        /// Default and only value of the <see cref="Unit"/> type.
+        /// Default and only value of the <see cref="NoResult"/> type.
         /// </summary>
-        public static readonly Unit Value = new Unit();
+        public static readonly NoResult Value = new NoResult();
 
         /// <summary>
         /// Compares the current object with another object of the same type.
@@ -23,7 +23,7 @@
         ///  - Zero: This object is equal to <paramref name="other" />.
         ///  - Greater than zero: This object is greater than <paramref name="other" />.
         /// </returns>
-        public int CompareTo(Unit other)
+        public int CompareTo(NoResult other)
         {
             return 0;
         }
@@ -62,7 +62,7 @@
         /// <returns>
         /// <c>true</c> if the current object is equal to the <paramref name="other" /> parameter; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(Unit other)
+        public bool Equals(NoResult other)
         {
             return true;
         }
@@ -76,7 +76,7 @@
         /// </returns>
         public override bool Equals(object obj)
         {
-            return obj is Unit;
+            return obj is NoResult;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@
         /// <param name="first">The first object.</param>
         /// <param name="second">The second object.</param>
         /// <c>true</c> if the <paramref name="first"/> object is equal to the <paramref name="second" /> object; otherwise, <c>false</c>.
-        public static bool operator ==(Unit first, Unit second)
+        public static bool operator ==(NoResult first, NoResult second)
         {
             return true;
         }
@@ -96,7 +96,7 @@
         /// <param name="first">The first object.</param>
         /// <param name="second">The second object.</param>
         /// <c>true</c> if the <paramref name="first"/> object is not equal to the <paramref name="second" /> object; otherwise, <c>false</c>.
-        public static bool operator !=(Unit first, Unit second)
+        public static bool operator !=(NoResult first, NoResult second)
         {
             return false;
         }

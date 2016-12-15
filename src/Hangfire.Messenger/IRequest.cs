@@ -3,7 +3,7 @@ namespace Hangfire.Messenger
     /// <summary>
     /// Marker interface to represent an asynchronous request with a void response
     /// </summary>
-    public interface IRequest : IRequest<Unit> { }
+    public interface IRequest : IRequest<NoResult> { }
 
     /// <summary>
     /// Marker interface to represent an asynchronous request with a response

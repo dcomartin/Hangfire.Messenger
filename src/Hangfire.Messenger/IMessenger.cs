@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Hangfire.Server;
 
 namespace Hangfire.Messenger
 {
@@ -7,6 +8,8 @@ namespace Hangfire.Messenger
     /// </summary>
     public interface IMessenger
     {
+        PerformContext PerformContext { get; set; }
+
         /// <summary>
         /// Asynchronously send a request to a single handler 
         /// </summary>

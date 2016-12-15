@@ -11,7 +11,7 @@ namespace Hangfire.Messenger.Demo
         static void Main(string[] args)
         {
             var container = new UnityContainer();
-            container.RegisterType<IRequestHandler<Ping, Unit>, PingHandler>();
+            container.RegisterType<IRequestHandler<Ping, NoResult>, PingHandler>();
             container.RegisterType<IRequestHandler<RequestWithResponse, string>, RequestWithResponseHandler>();
             container.RegisterType<INotificationHandler<Pong>, Pong1Handler>("HandlerForPong");
             container.RegisterType<INotificationHandler<Pong>, Pong2Handler>("HandlerForPongPong");

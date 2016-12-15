@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using Hangfire.Messenger.Internal;
+using Hangfire.Server;
 
 namespace Hangfire.Messenger
 {
@@ -16,6 +17,7 @@ namespace Hangfire.Messenger
         private readonly Func<Type, IEnumerable<object>> _notificationHandlerFactory;
         private readonly ConcurrentDictionary<Type, Type> _genericHandlerCache;
         private readonly ConcurrentDictionary<Type, Type> _wrapperHandlerCache;
+        public PerformContext PerformContext { get; set; }
 
         public Messenger(Func<Type, object> commandHandlerFactory, Func<Type, IEnumerable<object>> notificationHandlerFactory)
         {
@@ -27,7 +29,7 @@ namespace Hangfire.Messenger
 
         public void Enqueue(IRequest request)
         {
-            BackgroundJob.Enqueue<Messenger>(m => m.DequeueRequest(request.GetType().FullName, "default", request));
+            BackgroundJob.Enqueue<Messenger>(m => m.DequeueRequest(null, request.GetType().FullName, "default", request));
         }
 
         public void PublishToBackground(INotification notification)
@@ -45,25 +47,26 @@ namespace Hangfire.Messenger
                 foreach (var handler in notificationHandlers)
                 {
                     BackgroundJob.Enqueue<Messenger>(
-                        m =>
-                            m.DequeueNotification(handler.GetNotificationHandlerType().FullName, queueName,
+                        m => m.DequeueNotification(null, handler.GetNotificationHandlerType().FullName, queueName,
                                 handler.GetNotificationHandlerType(), notification));
 
                 }
             }
         }
 
-        [UseQueueFromParameter(1)]
-        [DisplayName("{0}")]
-        public void DequeueRequest(string jobName, string queueName, IRequest request)
+        [UseQueueFromParameter(2)]
+        [DisplayName("{1}")]
+        public void DequeueRequest(PerformContext context, string jobName, string queueName, IRequest request)
         {
+            PerformContext = context;
             Send(request).Wait();
         }
 
-        [DisplayName("{0}")]
-        [UseQueueFromParameter(1)]
-        public void DequeueNotification(string jobName, string queueName, Type handler, INotification notification)
+        [DisplayName("{1}")]
+        [UseQueueFromParameter(2)]
+        public void DequeueNotification(PerformContext context, string jobName, string queueName, Type handler, INotification notification)
         {
+            PerformContext = context;
             PublishAsync(notification, handler).Wait();
         }
         
@@ -100,8 +103,11 @@ namespace Hangfire.Messenger
         {
             var requestType = request.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, typeof(IRequestHandler<,>), (type, root) => root.MakeGenericType(type, typeof(TResponse)));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, typeof(RequestHandlerWrapper<,>), (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(requestType, typeof(IRequestHandler<,>),
+                (type, root) => root.MakeGenericType(type, typeof(TResponse)));
+
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(requestType, typeof(RequestHandlerWrapper<,>),
+                (type, root) => root.MakeGenericType(type, typeof(TResponse)));
 
             var handler = GetRequestHandler(request, genericHandlerType);
 
@@ -124,8 +130,11 @@ namespace Hangfire.Messenger
         {
             var notificationType = notification.GetType();
 
-            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, typeof(INotificationHandler<>), (type, root) => root.MakeGenericType(type));
-            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType, typeof(NotificationHandlerWrapper<>), (type, root) => root.MakeGenericType(type));
+            var genericHandlerType = _genericHandlerCache.GetOrAdd(notificationType, typeof(INotificationHandler<>),
+                (type, root) => root.MakeGenericType(type));
+
+            var genericWrapperType = _wrapperHandlerCache.GetOrAdd(notificationType,
+                typeof(NotificationHandlerWrapper<>), (type, root) => root.MakeGenericType(type));
 
             return GetNotificationHandlers(notification, genericHandlerType)
                 .Select(handler => Activator.CreateInstance(genericWrapperType, this, handler))
@@ -147,7 +156,10 @@ namespace Hangfire.Messenger
 
         private static InvalidOperationException BuildException(object message, Exception inner)
         {
-            return new InvalidOperationException("Handler was not found for request of type " + message.GetType() + ".\r\nContainer or service locator not configured properly or handlers not registered with your container.", inner);
+            return
+                new InvalidOperationException(
+                    $"Handler was not found for request of type {message.GetType()}.  Container or service locator not configured properly or handlers not registered with your container.",
+                    inner);
         }
 
         public void Dispose()

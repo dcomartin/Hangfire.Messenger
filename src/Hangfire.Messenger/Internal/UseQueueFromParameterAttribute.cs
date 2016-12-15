@@ -1,7 +1,7 @@
 ﻿using Hangfire.Common;
 using Hangfire.States;
 
-namespace Hangfire.Messenger
+namespace Hangfire.Messenger.Internal
 {
     internal class UseQueueFromParameterAttribute : JobFilterAttribute, IElectStateFilter
     {

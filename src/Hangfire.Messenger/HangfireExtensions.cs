@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Hangfire.Common;
+using Hangfire.Messenger.Internal;
 using Newtonsoft.Json;
 
 namespace Hangfire.Messenger
